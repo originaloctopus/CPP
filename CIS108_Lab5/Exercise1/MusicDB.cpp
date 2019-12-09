@@ -1,67 +1,85 @@
-#include "MusicDB.h"
-#include "Song.h"
+#include <stdexcept>
 #include <fstream>
-#include <iostream>
-#include <string>
-#include <algorithm>
+#include "MusicDB.h"
+#include <vector>
+#include ""
 
 using namespace std;
-using namespace songStruc;
 
-void add() {
+const string DatabaseFileName = "Music.db";
 
-	Song a_Song;
-	cout << "Enter song's title:\n";
-	cin.getline(a_Song.title, 64);
+namespace MusicDatabase
+{
+	vector<Song> songDatabase;
 
-	cout << "Enter song's artist:\n";
-	cin.getline(a_Song.artist, 64);
+	// Function to add a song to the MusicDatabase
+	void addSongToDatabase(Song song)
+	{
+		songDatabase.push_back(song);
+	}
 
-	cout << "Enter song's album:\n";
-	cin.getline(a_Song.album, 64);
+	// Function to ask how many songs are in the MusicDatabase
+	int getTotalSongsInDatabase()
+	{
+		return songDatabase.size();
+	}
 
-	/*
-	cout << "Enter song's track number:\n";
-	cin.getline(a_Song.track_Num, 64);
+	// Function to get a song at a specific location in the MusicDatabase
+	Song getSongAtIndex(int index)
+	{
+		if (index < getTotalSongsInDatabase())
+		{
+			return songDatabase[index];
+		}
+		else
+		{
+			throw new out_of_range("Invalid index into MusicDatabase");
+		}
+	}
 
-	cout << "Enter song's release year:\n";
-	cin.getline(a_Song.releaseYear, 64);
+	//Function to load the database from file
+	void loadDatabase()
+	{
+		ifstream file(DatabaseFileName, ios_base::binary);
+
+		int count = 0;
+		file >> count;
+
+		for (int x = 0; x < count; x++)
+		{
+			Song song;
+			file.read((char*)&song, sizeof(Song));
+			songDatabase.push_back(song);
+		}
+
+		file.close ();
+	}
+
+	//Function to save the database to file
+	void saveDatabase()
+	{
+		ofstream file(DatabaseFileName, ios_base::trunc | ios_base::binary);
+		file << getTotalSongsInDatabase();
+		
+		auto itr = songDatabase.begin();
+		while (itr != songDatabase.end())
+		{
+			Song song = *itr;
+
+			/*
+			file << song.title;
+			file << song.artist;
+			file << song.album;
+			file << song.track;
+			file << song.year;
+			file << song.genre;
+			*/
+
+			file.write((const char*)&song, sizeof(Song));
+			itr++;
+		}
+		file.close();
+	}
+
 	
-	
-	Song a_Song;
-
-	std::fstream file;
-	file.open("SongDB.text", ios::in | ios::app | ios::binary);
-	file.read((char*)&a_Song, sizeof(a_Song));
-	file.close();
-	*/
-};
-
-void load() {
-
-	Song a_song;
-
-	std::fstream file("SongDB.bin", ios::out | ios::binary);
-	file.write((char*)&a_song, sizeof(a_song));
-	file.close();
-
-};
-
-void save() {
-
-	Song a_song;
-
-	std::fstream file("SongDB.bin", ios::out | ios::binary);
-	file.write((char*)&a_song, sizeof(a_song));
-	file.close();
-
-};
-
-void help() {
-	cout << "To add songs type add and press enter.\n"
-		"To list songs type list and press enter.\n"
-		"To save songs type save and press enter.\n"
-		"To see this menu again type help and press enter.\n "
-		"To exit type exit and press enter.\n";
-};
-
+}

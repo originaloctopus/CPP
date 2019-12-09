@@ -1,26 +1,26 @@
-namespace songStruc {
-	enum Genre
-	{
-		Blues = 0,
-		Country,
-		Electronic,
-		Folk,
-		Hiphop,
-		Jazz,
-		Latin,
-		Pop,
-		Rock
-	};
+enum Genre
+{
+	Blues,
+	Country,
+	Electronic,
+	Folk,
+	HipHop,
+	Jazz,
+	Latin,
+	Pop,
+	Rock
+};
 
-	 typedef struct _Song
-	{	
-		char title[64];
-		char artist[32];
-		char album[64];
-		int track_Num[4];
-		int releaseYear[4];
-		Genre genre;
+const int MAX_CHARS_PER_TITLE = 64;
+const int MAX_CHARS_PER_ARTIST = 32;
+const int MAX_CHARS_PER_ALBUM = 64;
 
-	} Song;
-
-}
+struct Song
+{
+	char title[MAX_CHARS_PER_TITLE];
+	char artist[MAX_CHARS_PER_ARTIST];
+	char album[MAX_CHARS_PER_ALBUM];
+	int track;
+	int year;
+	Genre genre;
+};

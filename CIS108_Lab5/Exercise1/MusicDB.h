@@ -1,11 +1,21 @@
-#pragma once
+#include <vector>
 
-void add();
+#include "song.h"
 
-void load();
+namespace MusicDatabase
+{
+	// Function to add a song to the MusicDatabase
+	void addSongToDatabase(Song song);
 
-void save();
+	// Function to ask how many songs are in the MusicDatabase
+	int getTotalSongsInDatabase();
 
-void help();
+	// Function to get a song at a specific location in the MusicDatabase
+	Song getSongAtIndex(int index);
 
-void exit();
+	//Function to load the database from file
+	void loadDatabase();
+
+	//Function to save the database to file
+	void saveDatabase();
+}

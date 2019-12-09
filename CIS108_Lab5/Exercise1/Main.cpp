@@ -1,189 +1,201 @@
-
-#include "Song.h"
-#include "MusicDB.h"
-//#include converter.h & make converter.cpp
-#include <string>
 #include <iostream>
+#include <string>
+#include "MusicDB.h"
 
-#include <fstream>
-
-//focus on the layout
-//create support for abde, don't worry about file i/o or saving
-
-#include <stdio.h>
 using namespace std;
-using namespace songStruc;
 
-/* 
-	input = (read) = load
-	output = (write) = save
-*/
+string getCommandFromUser();
+
+void handleAddCommand();
+void handleListCommand();
+void handleSaveCommand();
+void handleHelpCommand();
+
+Genre convertStringToGenre(string genre_string);
+string convertGenreToString(Genre genre_enum);
 
 
 
-Genre convertStringtoGenre(string genre)
+int main()
 {
-	Genre return_value;
-
-	/*transform(genre.begin(), genre.end(), genre.begin(),
-		[](unsigned char c) {return tolower(c); });
-		*/
-
-	if (genre == "blues") {
-		return_value = Blues;
-	} else if (genre == "country"){
-		return_value = Country;
+	try {
+		MusicDatabase::loadDatabase();
 	}
-	else if (genre == "electronic") {
-		return_value = Electronic;
+	catch (...)
+	{
+		//these aren't the droids your'e looking for
 	}
-	else if (genre == "hiphop") {
-		return_value = Hiphop;
-	}
-	else if (genre == "jazz") {
-		return_value = Jazz;
-	}
-	else if (genre == "latin") {
-		return_value = Latin;
-	}
-	else if (genre == "pop") {
-		return_value = Pop;
-	}
-	else if (genre == "rock") {
-		return_value = Rock;
-	}
-	return return_value;
-}
-
-string convertGenretoString(Genre genre) {
-	string return_value;
-
-	switch (genre) {
-		case Blues: 
-			return_value = "Blues";
-			break;
-		case Country:
-			return_value = "Country";
-			break;
-		case Electronic:
-			return_value = "Electronic";
-			break;
-		case Hiphop:
-			return_value = "Hiphop";
-			break;
-		case Jazz:
-			return_value = "Jazz";
-			break;
-		case Latin:
-			return_value = "Latin";
-			break;
-		case Pop:
-			return_value = "Pop";
-			break;
-		case Rock:
-			return_value = "Rock";
-			break;
-
 	
-	}
-	return return_value;
-}
+	handleHelpCommand();
 
-int main() {
+	bool should_exit = false;
 
-	string input;
-
-	do {
-		
-		help();
-
-		getline(cin, input);
-
-		if (input == "add") {
-			cout << "Add a song to the music database:\n";
-			add();
-
+	while (!should_exit)
+	{
+		string command = getCommandFromUser();
+		if (command == "add")
+		{
+			handleAddCommand();
 		}
-		/*
-		string u_Track_Num;
-		puts("Enter song's track number: \n");
-		getline(cin, u_Track_Num);
-		int int_Track_Num = stoi(u_Track_Num);
-		int_Track_Num = a_Song.track_Num;
-		cout << "Added: " + u_Album << endl;
-
-
-		string release_Year;
-		puts("Enter song's release year: \n");
-		getline(cin, release_Year);
-		cout << cin.rdbuf();
-
-		string genre;
-		puts("Enter song's genre: \n");
-		getline(cin, genre);
-		cout << cin.rdbuf();
-		
+		else if (command == "list")
+		{
+			handleListCommand();
 		}
-		*/
-	
-	else if (input == "load") {
-		load();
-		cout << "load. \n";
+		else if (command == "save")
+		{
+			handleSaveCommand();
+		}
+		else if (command == "help")
+		{
+			handleHelpCommand();
+		}
+		else if (command == "exit")
+		{
+			should_exit = true;
+		}
+		else
+		{
+			cout << "Invalid command. Type 'help' for command list." << endl;
+		}
 	}
+}
 
-	else if (input == "save") {
-		save();
-		cout << "save. \n";
+string getCommandFromUser()
+{
+	string command;
+
+	cout << "> ";
+	getline(cin, command);
+
+	return command;
+}
+
+void handleAddCommand()
+{
+	Song new_song;
+
+	cout << "Enter song title: ";
+	cin.getline(new_song.title, MAX_CHARS_PER_TITLE);
+
+	cout << "Enter song artist: ";
+	cin.getline(new_song.artist, MAX_CHARS_PER_ARTIST);
+
+	cout << "Enter song album: ";
+	cin.getline(new_song.album, MAX_CHARS_PER_ALBUM);
+
+	cout << "Enter the track number: ";
+	cin >> new_song.track;
+
+	cout << "Enter the release year: ";
+	cin >> new_song.year;
+
+	string genre;
+	cout << "Enter the genre: ";
+	cin.ignore();
+	getline(cin, genre);
+
+	new_song.genre = convertStringToGenre(genre);
+
+	MusicDatabase::addSongToDatabase(new_song);
+}
+
+void handleListCommand()
+{
+	int total_songs = MusicDatabase::getTotalSongsInDatabase();
+
+	cout << "There are " << total_songs << " songs in the database." << endl;
+
+	for (int idx = 0; idx < total_songs; idx++)
+	{
+		Song song = MusicDatabase::getSongAtIndex(idx);
+
+		cout << "Title:        " << song.title << endl;
+		cout << "Artist:       " << song.artist << endl;
+		cout << "Album:        " << song.album << endl;
+		cout << "Track #:      " << song.track << endl;
+		cout << "Release Year: " << song.year << endl;
+		cout << "Genre:        " << convertGenreToString(song.genre) << endl;
+		cout << endl;
 	}
+}
 
-	else if (input == "help") {
-		help();
-		cout << "help. \n";
-	}
-	else if (input == "exit") {
-		cout << "exit. \n";
-		return 0;
-	}
-
-
-} while (input != "exit");
-
-
-
-/*
-	int input;
-		puts("To add songs type add and press enter. \nTo list songs type list and press enter. \nTo save songs type save and press enter. \nTo exit type x and press enter. \nTo see this menu again type help and press enter. \n");
-		do {
-			input = getchar();
-			putchar(input);
-
-
-			if (input == 'add') {
-				add();
-				cout << "add. \n";
-			}
-			else if (input == 'load') {
-				load();
-				cout << "load. \n";
-			}
-
-			else if (input == 'save') {
-				save();
-				cout << "save. \n";
-			}
-
-			else if (input == 'help') {
-				help();
-				cout << "help. \n";
-			}
-
-		} while (input != 'x');
-	}
-	
-
-
-	} while (input != "Exit");
-
-	*/
+void handleSaveCommand()
+{
+	MusicDatabase::saveDatabase();
 
 }
+
+void handleHelpCommand()
+{
+	cout << "Music Database Command Options:" << endl;
+	cout << "  add  - Add a new song to the database" << endl;
+	cout << "  list - List the songs in the database" << endl;
+	cout << "  save - Save the songs to the database" << endl;
+	cout << "  help - Display this menu" << endl;
+	cout << "  exit - Exit the program" << endl;
+}
+
+Genre convertStringToGenre(string genre_string)
+{
+	Genre genre;
+
+	if (genre_string == "blues")
+	{
+		genre = Genre::Blues;
+	}
+	else if (genre_string == "country")
+	{
+		genre = Genre::Country;
+	}
+	else if (genre_string == "electronic")
+	{
+		genre = Genre::Electronic;
+	}
+	else if (genre_string == "folk")
+	{
+		genre = Genre::Folk;
+	}
+	else if (genre_string == "hip hop")
+	{
+		genre = Genre::HipHop;
+	}
+	else if (genre_string == "jazz")
+	{
+		genre = Genre::Jazz;
+	}
+	else if (genre_string == "latin")
+	{
+		genre = Genre::Latin;
+	}
+	else if (genre_string == "pop")
+	{
+		genre = Genre::Pop;
+	}
+	else if (genre_string == "rock")
+	{
+		genre = Genre::Rock;
+	}
+
+	return genre;
+}
+
+string convertGenreToString(Genre genre_enum)
+{
+	string genre;
+
+	switch (genre_enum)
+	{
+	case Blues: genre = "Blues"; break;
+	case Country: genre = "Country"; break;
+	case Electronic: genre = "Electronic"; break;
+	case Folk: genre = "Folk"; break;
+	case HipHop: genre = "Hip Hop"; break;
+	case Jazz: genre = "Jazz"; break;
+	case Latin: genre = "Latin"; break;
+	case Pop: genre = "Pop"; break;
+	case Rock: genre = "Rock"; break;
+	}
+
+	return genre;
+}
+
